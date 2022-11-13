@@ -40,10 +40,16 @@ calculosJuegoPorAnio lecturaCalculo(char *lineaCalculo)
     return nuevoCalculo;
 }
 
+bool verificarAnio(calculosJuegoPorAnio * listadoCalculos, juego nuevoJuego, int n){
+    for(int i=0;i<n;i++){
+        
+    }
+}
 
 
-
-
+// Descripción: Función que 
+// Entrada: array.
+// Salida: void.
 void *funcionHebra(void *arg){
     while (!feof(archivoEntrada)){
         char buffer[2000];
@@ -53,7 +59,7 @@ void *funcionHebra(void *arg){
                 break;
             }
             printf("%s", buffer);
-            //juego nuevoJuego = lecturaJuego(buffer);
+            juego nuevoJuego = lecturaJuego(buffer);
             
         }
         pthread_mutex_unlock(&lock);

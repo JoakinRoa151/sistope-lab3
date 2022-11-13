@@ -7,6 +7,7 @@ int anio = 0;
 float precioMenor = 0;
 int chunk= 1;
 calculosJuegoPorAnio *listadoCalculosPorAnio;
+int tamanioCalculos=0;
 
 int main(int argc, char* argv[]){
 	extern char *optarg; //Almacena los argumentos introducidos después de haber indicado la variable.
@@ -88,7 +89,7 @@ int main(int argc, char* argv[]){
 
     // Id de las hebras
     pthread_t hebrasId[cantidadHebras];
-    listadoCalculosPorAnio = (calculosJuegoPorAnio *)malloc(sizeof(calculosJuegoPorAnio) * (0));
+    listadoCalculosPorAnio = (calculosJuegoPorAnio *)malloc(sizeof(calculosJuegoPorAnio) * (tamanioCalculos));
 
     // Se inicializa el mutex
     if(pthread_mutex_init(&lock, NULL) != 0){

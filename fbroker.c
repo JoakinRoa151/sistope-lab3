@@ -1,9 +1,9 @@
 #include "fbroker.h"
 
 /*
+Descripción: funcion que agrega datos de una lista tipo struct calculoJuegoPorAnio
 Entrada: lista de struct calculosJuegoPorAnio , calculo que se agregara, tamaño de la lista
 Salida: lista de struct calculosJuegoPorAnio  con un dato agregado
-Descripción: funcion que agrega datos de una lista tipo struct calculoJuegoPorAnio
 */
 calculosJuegoPorAnio *agregarCalculoLista(calculosJuegoPorAnio *listaCalculos, calculosJuegoPorAnio calculoAgregar, int *n)
 {
