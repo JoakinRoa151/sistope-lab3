@@ -3,19 +3,24 @@
 int main(int argc, char *argv[])
 {
     // LECTURA WORKERS
-    char buff[1000];
+    char buff[2000];
     int contador = 0;
-    char lectura[100000] = "";
+    char lectura[300000] = "";
     char *puntero_string;
+    // precio minimo ingresado por flag
+    int precioMinimo= atoi(argv[2]);
+    // anio minimo ingresado por flag
+    int anioMinimo= atoi(argv[1]);
+    // Lectura de lineas enviadas por el broker
     while (1)
     {
-        read(STDIN_FILENO, buff, 1000);
+        read(STDIN_FILENO, buff, 2000);
         if (strcmp(buff, "FIN") == 0)
         {
             break;
         }
         strcat(lectura, buff);
-        strcat(lectura, ",+,");
+        strcat(lectura, "}");
         contador++;
     }
 
@@ -26,23 +31,26 @@ int main(int argc, char *argv[])
     {
         lineas[i] = (char *)malloc(sizeof(char) * 500);
     }
-    puntero_string = strtok(lectura, "+");
-    // Se agregan las lineas a
+    puntero_string = strtok(lectura, "}");
+    // Se agregan las lineas a un arreglo de lineas
     for (int i = 0; i < contador; i++)
     {
         strcpy(lineas[i], puntero_string);
-        puntero_string = strtok(NULL, "+");
+        puntero_string = strtok(NULL, "}");
     }
-
-    juego *listadoJuegos = (juego *)malloc(sizeof(juego) * (contador));
+    // Se declara un arreglo para almacenar los juegos
+    //juego *listadoJuegos = (juego *)malloc(sizeof(juego) * (contador));
+    juego juegoAgregar;      
+    int lenListadoJuegos=0;
+    juego *listadoJuegos = (juego *)malloc(sizeof(juego) * (lenListadoJuegos));
     for (int i = 0; i < contador; i++)
     {
-        listadoJuegos[i] = lecturaJuego(lineas[i]);
-        // printf("ID:%d, nombre: %s, restriccion: %d, precio: %f, proximamente:%s, fechaLanzamiento: %d, gratuidad: %s, windows: %s,mac: %s,linux: %s\n", listadoJuegos[i].id, listadoJuegos[i].nombre, listadoJuegos[i].restriccion, listadoJuegos[i].precio, listadoJuegos[i].proximamente, listadoJuegos[i].fechaLanzamiento, listadoJuegos[i].gratuidad, listadoJuegos[i].windows, listadoJuegos[i].mac, listadoJuegos[i].linuxx);
+        juegoAgregar= lecturaJuego(lineas[i]);
+        if((juegoAgregar.fechaLanzamiento >= anioMinimo) && (juegoAgregar.precio>=precioMinimo)){
+            listadoJuegos=agregarJuegoLista(listadoJuegos,juegoAgregar,&lenListadoJuegos);
+        }
     }
 
-    // ESCRITURA WORKER
-    // write(STDOUT_FILENO, "XDDDDDD", 7);}
 
     // Liberando memoria de  los arreglos
 
@@ -53,7 +61,8 @@ int main(int argc, char *argv[])
     free(lineas);
 
     // Empezando los calculos
-    int cantidadJuegos = contador;
+    int cantidadJuegos = lenListadoJuegos;
+
     // Ordenamos la lista de juegos de el anio mas pequeño al mas grande
 
     mergeSort(listadoJuegos, 0, cantidadJuegos - 1);
@@ -73,7 +82,7 @@ int main(int argc, char *argv[])
     int cantidadJuegosPorAnio = 0;
     int cantidadAnios = 0;
     float sumaPreciosPorAnio = 0;
-    char juegosGratis[2500] = "";
+    char juegosGratis[2500] = "-";
     // Declaramos arreglo para guardar los datos de cada año
     int lenListadoCalculosPorAnio = 0;
     calculosJuegoPorAnio *listadoCalculosPorAnio = (calculosJuegoPorAnio *)malloc(sizeof(calculosJuegoPorAnio) * (lenListadoCalculosPorAnio));
@@ -113,7 +122,7 @@ int main(int argc, char *argv[])
             sumaPreciosPorAnio = 0;
             strcpy(juegoMasCaro, listadoJuegos[i].nombre);
             strcpy(juegoMasBarato, listadoJuegos[i].nombre);
-            strcpy(juegosGratis, "");
+            strcpy(juegosGratis, "-");
             precioMasBarato = listadoJuegos[i].precio;
             precioMasCaro = listadoJuegos[i].precio;
         }
@@ -129,8 +138,23 @@ int main(int argc, char *argv[])
             precioMasBarato = listadoJuegos[i].precio;
             strcpy(juegoMasBarato, listadoJuegos[i].nombre);
         }
+        /* // Se ve que juegos están en la plataforma Windows.
+        if (strcmp(listadoJuegos[i].windows, "Yes") == 0)
+        {
+            windows++;
+        }
+        // Se ve que juegos están en la plataforma Mac.
+        if (strcmp(listadoJuegos[i].mac, "Yes") == 0)
+        {
+            mac++;
+        }
+        // Se ve que juegos están en la plataforma Linux.
+        if (strcmp(listadoJuegos[i].linuxx, "Yes") == 0)
+        {
+            linuxx++;
+        } */
         // Se ve que juegos están en la plataforma Windows.
-        if (listadoJuegos[i].windows[0]== 'Y')
+        if (listadoJuegos[i].windows[0]=='Y')
         {
             windows++;
         }
@@ -140,16 +164,19 @@ int main(int argc, char *argv[])
             mac++;
         }
         // Se ve que juegos están en la plataforma Linux.
-        if (listadoJuegos[i].linuxx[0]=='Y')
+        if (listadoJuegos[i].linuxx[0] == 'Y')
         {
             linuxx++;
         }
+        // Se ve si el juego es gratis para almacenarlo en el string de juegos gratis
         if (strcmp(listadoJuegos[i].gratuidad, "True") == 0)
         {
             strcat(juegosGratis, listadoJuegos[i].nombre);
             strcat(juegosGratis, "\n");
         }
+        // contador de juegos por anio
         cantidadJuegosPorAnio++;
+        sumaPreciosPorAnio=listadoJuegos[i].precio+sumaPreciosPorAnio;
     }
     // Guardamos los datos calculados deL ultimo año
     calculoJuego.anioJuego = anioJuegosActual;
@@ -167,30 +194,30 @@ int main(int argc, char *argv[])
     anioJuegosActual = listadoJuegos[cantidadAnios - 1].fechaLanzamiento;
     // agregar este struct  a un array de structs
     listadoCalculosPorAnio = agregarCalculoLista(listadoCalculosPorAnio, calculoJuego, &lenListadoCalculosPorAnio);
-    // printf("cual es:%d %s\n",listadoCalculosPorAnio[0].cantidadJuegos, listadoCalculosPorAnio[0].juegosGratis);
 
-    char aux[11000];
-    // printf("contador: %d\n", contador);
-    for (int i = 0; i < cantidadAnios; i++)
-    {
-        //printf("%d ,%d, %d, %d, %d, %s, %s, %f, %f, %f \n ", listadoCalculosPorAnio[i].anioJuego, listadoCalculosPorAnio[i].cantidadJuegos, listadoCalculosPorAnio[i].windows, listadoCalculosPorAnio[i].mac, listadoCalculosPorAnio[i].linuxx, listadoCalculosPorAnio[i].nombreJuegoMasCaro, listadoCalculosPorAnio[i].nombreJuegoMasBarato, listadoCalculosPorAnio[i].precioJuegoMasCaro, listadoCalculosPorAnio[i].precioJuegoMasBarato, listadoCalculosPorAnio[i].sumaPreciosPorAnio);
-        //printf("Juegos gratis de este anio: %s \n", listadoCalculosPorAnio[i].juegosGratis);
-        sprintf(aux, "%d+%d+%d+%d+%d+%s+%s+%s+%f+%f+%f+", listadoCalculosPorAnio[i].anioJuego, listadoCalculosPorAnio[i].cantidadJuegos, listadoCalculosPorAnio[i].windows, listadoCalculosPorAnio[i].mac, listadoCalculosPorAnio[i].linuxx, listadoCalculosPorAnio[i].nombreJuegoMasCaro, listadoCalculosPorAnio[i].nombreJuegoMasBarato, listadoCalculosPorAnio[i].juegosGratis, listadoCalculosPorAnio[i].precioJuegoMasCaro, listadoCalculosPorAnio[i].precioJuegoMasBarato, listadoCalculosPorAnio[i].sumaPreciosPorAnio);
-
-        if (write(STDOUT_FILENO, aux, 11000) == -1)
+    // ENVIO DE CANTIDAD DE LINEAS LEIDAS POR EL WORKER
+    if (write(STDOUT_FILENO, &cantidadJuegos, sizeof(cantidadJuegos)) == -1)
+        {
+            perror("Error al escribir en el archivo");
+            exit(1);
+        }
+    
+    // ENVIO DE CANTIDAD DE AÑOS CALCULADOS POR EL WORKER
+    if (write(STDOUT_FILENO, &cantidadAnios, sizeof(cantidadAnios)) == -1)
+        {
+            perror("Error al escribir en el archivo");
+            exit(1);
+        }
+    
+    // Envio de los datos calculados por el worker
+    for(int i=0; i<cantidadAnios;i++){
+        if(write(STDOUT_FILENO,&listadoCalculosPorAnio[i],sizeof(calculosJuegoPorAnio)) == -1)
         {
             perror("Error al escribir en el archivo");
             exit(1);
         }
     }
-    char buffer[11000] = "FIN";
-    if (write(STDOUT_FILENO, buffer, 11000) == -1)
-    {
-        perror("Error al escribir en el archivo");
-        exit(1);
-    }
-
     free(listadoJuegos);
-    free(listadoCalculosPorAnio);
     return 0;
 }
+
